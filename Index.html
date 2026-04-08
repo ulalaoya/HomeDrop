@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HomeDrop .IL — קולקציית המבצעים לבית</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #f5f0e8;
+      --card-bg:   #fdfaf5;
+      --navy:      #1e3a4f;
+      --gold:      #c9a227;
+      --green:     #1a5c3a;
+      --text:      #2c3830;
+      --text-mid:  #5a6b60;
+      --text-light:#9aab9f;
+      --border:    #e4ddd0;
+      --shadow:    rgba(30,58,79,0.08);
+      --radius:    14px;
+      --sidebar-w: 175px;
+      --header-h:  58px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Background image as wallpaper ── */
+    body {
+      font-family: 'Heebo', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      direction: rtl;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: url('HomeDrop New Theme.png') center top / cover no-repeat;
+      opacity: 0.13;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── Sticky slim header ── */
+    .page-header {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      height: var(--header-h);
+      background: rgba(245,240,232,0.96);
+      backdrop-filter: blur(12px);
+      border-bottom: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 0 24px;
+      direction: rtl;
+    }
+    .brand-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--navy);
+      white-space: nowrap;
+      letter-spacing: -0.5px;
+      cursor: pointer;
+    }
+    .brand-name .il {
+      color: var(--gold);
+      font-size: 0.72em;
+      font-style: italic;
+      font-weight: 400;
+    }
+    .brand-tagline {
+      font-size: 12px;
+      color: var(--text-mid);
+      white-space: nowrap;
+    }
+    .header-search {
+      margin-right: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: 50px;
+      padding: 6px 14px;
+      min-width: 200px;
+      transition: border-color 0.18s;
+    }
+    .header-search:focus-within { border-color: var(--navy); }
+    .header-search svg { color: var(--text-light); flex-shrink: 0; }
+    .search-input {
+      border: none; background: transparent;
+      font-family: 'Heebo', sans-serif;
+      font-size: 13px; color: var(--text);
+      outline: none; width: 100%; direction: rtl;
+    }
+    .search-input::placeholder { color: var(--text-light); }
+
+    /* ── Page body: sidebar + main ── */
+    .page-body {
+      display: flex;
+      align-items: flex-start;
+      position: relative;
+      z-index: 1;
+      min-height: calc(100vh - var(--header-h));
+    }
+
+    /* ── Left sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      position: sticky;
+      top: var(--header-h);
+      height: calc(100vh - var(--header-h));
+      overflow-y: auto;
+      padding: 16px 10px;
+      background: rgba(244,239,229,0.9);
+      backdrop-filter: blur(8px);
+      border-left: 1.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .sidebar-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-light);
+      padding: 4px 10px 8px;
+    }
+    .sidebar-sep {
+      height: 1px;
+      background: var(--border);
+      margin: 8px 0;
+    }
+    .filter-link {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 16px 12px;
+      margin-bottom: 6px;
+      border-radius: 10px;
+      font-family: 'Heebo', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      text-align: right;
+      direction: rtl;
+      transition: background 0.15s, color 0.15s;
+    }
+    .filter-link:hover { background: rgba(30,58,79,0.07); color: var(--navy); }
+    .filter-link.active, .filter-link.active-deal {
+      background: var(--navy);
+      color: #fff;
+      font-weight: 600;
+    }
+    .filter-link .fcount {
+      font-size: 11px;
+      opacity: 0.55;
+      font-weight: 400;
+      background: rgba(0,0,0,0.06);
+      padding: 1px 6px;
+      border-radius: 20px;
+    }
+    .filter-link.active .fcount, .filter-link.active-deal .fcount {
+      background: rgba(255,255,255,0.2);
+      opacity: 0.9;
+    }
+    .intl-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-mid);
+      cursor: pointer;
+      padding: 6px 10px;
+    }
+    .results-info {
+      font-size: 12px;
+      color: var(--text-light);
+      padding: 6px 10px 0;
+    }
+
+    /* ── Main content ── */
+    .main-content {
+      flex: 1;
+      min-width: 0;
+      padding: 16px 20px 40px;
+    }
+
+    /* ── Card grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      gap: 14px;
+    }
+    .card {
+      position: relative;
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 14px 14px;
+      text-align: center;
+      text-decoration: none;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: box-shadow 0.18s, transform 0.18s;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+    .card:hover {
+      box-shadow: 0 6px 20px rgba(30,58,79,0.13);
+      transform: translateY(-2px);
+      z-index: 10;
+    }
+    .card.hidden { display: none; }
+    .intl-badge {
+      position: absolute;
+      top: 8px; left: 8px;
+      font-size: 13px;
+    }
+    .favicon-wrap {
+      width: 52px; height: 52px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--border);
+    }
+    .favicon-wrap img { width: 40px; height: 40px; object-fit: contain; }
+    .favicon-letter {
+      font-size: 22px; font-weight: 700;
+      color: var(--navy);
+    }
+    .site-name {
+      font-size: 14px; font-weight: 700;
+      color: var(--navy); line-height: 1.2;
+    }
+    .site-domain { font-size: 11px; color: var(--text-light); }
+    .sale-badge {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 1.2px;
+      padding: 3px 10px; border-radius: 20px;
+      text-transform: uppercase;
+    }
+    .sale-badge.badge-outlet  { background: #5c3d2e; color: #f5d9c5; }
+    .sale-badge.badge-sale    { background: var(--green); color: #c8f0d8; }
+    .sale-badge.badge-special { background: #7a6010; color: #fdeea3; }
+    .sale-badge.badge-visit   { background: var(--navy); color: #b8d0e8; }
+    .card-btn {
+      margin-top: 4px;
+      display: block;
+      width: 100%;
+      padding: 7px 0;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 12px; font-weight: 600;
+      color: var(--navy);
+      transition: all 0.15s;
+    }
+    .card:hover .card-btn {
+      background: var(--navy); color: #fff; border-color: var(--navy);
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-light);
+    }
+    .empty-state .emoji { font-size: 40px; display: block; margin-bottom: 12px; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 12px;
+      color: var(--text-light);
+      border-top: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
+    footer .brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px; font-weight: 600;
+      color: var(--navy); margin-bottom: 4px;
+    }
+    footer .il { color: var(--gold); }
+
+    /* ── Info tooltip ── */
+    .info-btn {
+      position: relative;
+      display: inline-block;
+      cursor: default;
+      font-size: 11px;
+      color: var(--text-mid);
+      background: none;
+      border: none;
+      padding: 2px 0;
+      width: 100%;
+      text-align: center;
+    }
+    .info-tooltip {
+      visibility: hidden;
+      opacity: 0;
+      position: absolute;
+      bottom: 105%;
+      right: 0;
+      width: 240px;
+      background: var(--navy);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      line-height: 1.6;
+      text-align: right;
+      z-index: 100;
+      transition: opacity 0.2s;
+      direction: rtl;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      pointer-events: none;
+    }
+    .info-btn:hover .info-tooltip {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    @media (max-width: 640px) {
+      :root { --sidebar-w: 120px; }
+      .brand-tagline { display: none; }
+      .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    }
+</style>
+</head>
+<body>
+
+<!-- ═══ SLIM HEADER ═══ -->
+<header class="page-header">
+  <div class="brand-name" onclick="resetAll()">HomeDrop <span class="il">.IL</span></div>
+  <div class="brand-tagline">מקסימום מבצעים, מעל 150 אתרים בארץ ובעולם</div>
+  <div class="header-search">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input class="search-input" type="text" id="search" placeholder="חפש אתר..." autocomplete="off">
+  </div>
+</header>
+
+<!-- ═══ PAGE BODY ═══ -->
+<div class="page-body">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-label">קטגוריה</div>
+    <button class="filter-link active" data-cat="all"          onclick="selectCat('all',this)">         <span>הכל</span>        <span class="fcount" id="fcnt-all"></span></button>
+    <button class="filter-link"        data-cat="general"      onclick="selectCat('general',this)">     <span>כללי</span>       <span class="fcount" id="fcnt-general"></span></button>
+    <button class="filter-link"        data-cat="furniture"    onclick="selectCat('furniture',this)">   <span>ריהוט</span>      <span class="fcount" id="fcnt-furniture"></span></button>
+    <button class="filter-link"        data-cat="rugs"         onclick="selectCat('rugs',this)">        <span>שטיחים</span>     <span class="fcount" id="fcnt-rugs"></span></button>
+    <button class="filter-link"        data-cat="textiles"     onclick="selectCat('textiles',this)">    <span>טקסטיל</span>     <span class="fcount" id="fcnt-textiles"></span></button>
+    <button class="filter-link"        data-cat="decor"        onclick="selectCat('decor',this)">       <span>עיצוב הבית</span>  <span class="fcount" id="fcnt-decor"></span></button>
+    <button class="filter-link"        data-cat="accessories"  onclick="selectCat('accessories',this)"> <span>אקססוריז</span>   <span class="fcount" id="fcnt-accessories"></span></button>
+    <button class="filter-link"        data-cat="walls"        onclick="selectCat('walls',this)">       <span>קירות</span>       <span class="fcount" id="fcnt-walls"></span></button>
+    <button class="filter-link"        data-cat="kitchen"      onclick="selectCat('kitchen',this)">     <span>מטבח</span>        <span class="fcount" id="fcnt-kitchen"></span></button>
+    <button class="filter-link"        data-cat="bathroom"     onclick="selectCat('bathroom',this)">    <span>אמבטיה</span>      <span class="fcount" id="fcnt-bathroom"></span></button>
+    <button class="filter-link"        data-cat="allhome"      onclick="selectCat('allhome',this)">     <span>הכל לבית</span>   <span class="fcount" id="fcnt-allhome"></span></button>
+    <button class="filter-link"        data-cat="lighting"     onclick="selectCat('lighting',this)">     <span>תאורה</span>       <span class="fcount" id="fcnt-lighting"></span></button>
+    <div class="sidebar-sep"></div>
+    <div class="sidebar-label">סוג מבצע</div>
+    <button class="filter-link active-deal" data-deal="all"     onclick="selectDeal('all',this)">     <span>הכל</span>              <span class="fcount" id="dcnt-all"></span></button>
+    <button class="filter-link"            data-deal="outlet"  onclick="selectDeal('outlet',this)">  <span>אאוטלט</span>           <span class="fcount" id="dcnt-outlet"></span></button>
+    <button class="filter-link"            data-deal="sale"    onclick="selectDeal('sale',this)">    <span>יש סייל</span>          <span class="fcount" id="dcnt-sale"></span></button>
+    <button class="filter-link"            data-deal="special" onclick="selectDeal('special',this)"> <span>מבצעים מיוחדים</span>   <span class="fcount" id="dcnt-special"></span></button>
+    <button class="filter-link"            data-deal="visit"   onclick="selectDeal('visit',this)">   <span>שווה לבדוק</span>       <span class="fcount" id="dcnt-visit"></span></button>
+    <div class="sidebar-sep"></div>
+    <label class="intl-toggle">
+      <input type="checkbox" id="intl-toggle" checked>
+      בינלאומי (משלוחים לישראל)
+    </label>
+    <div class="results-info">מציג <span id="visible-count">101</span> אתרים</div>
+  </aside>
+
+  <!-- MAIN GRID -->
+  <main class="main-content">
+    <div class="grid" id="grid"></div>
+  </main>
+
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="brand">HomeDrop <span class="il">.IL</span></div>
+  <div>כל האתרים מקושרים ישירות לאזורי המבצע שלהם · עדכון יומי</div>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════
+   SITES DIRECTORY — 159 unique sites
+   Categories: furniture | rugs | textiles | decor | accessories | walls | kitchen | bathroom | allhome | lighting
+   intl: true = international (ships to Israel)
+═══════════════════════════════════════════════ */
+const SITES = [
+  { name:"Inky", domain:"inky.co.il", url:"https://inky.co.il/product-category/outlet/", cat:"walls", intl:false, deal:"outlet", about:`הגלריה שלנו היא מגרש משחקים של עיצוב. אנחנו מציעים קולקציה רחבה ומתעדכנת, שנעה בין מינימליזם נקי לאקלקטיות צבעונית ופרועה. כל יצירה ב-Inky היא שילוב ייחודי של דמיון, צבע וחדשנות` },
+  { name:"שטיחי כרמל", domain:"carmelfloor.co.il", url:"https://carmelfloor.co.il/", cat:"rugs", intl:false, deal:"visit", about:`עוד משנת 1960 'שטיחי כרמל' נחשבת לחברת חיפויי הרצפה שטיחים ופרקטים הגדולה בישראל, המייצרת ומשווקת מוצרים בסטנדרטים טכנולוגיים מפותחים, בשימוש חומרים בעלי עמידות גבוהה במיוחד.` },
+  { name:"Bunny Bee", domain:"bunnybee.co.il", url:"https://www.bunnybee.co.il/product-category/sale/", cat:"furniture", intl:false, deal:"sale", about:`לבאני בי נגריה צמודה עם צוות באני בי תוכלו להגשים את כל הפנטזיות שלכם בהכנת ריהוט איכותי לפי מידה צבע וסגנון והכל תוצרת ישראל!` },
+  { name:"רהיטי הסיטי", domain:"rcity.co.il", url:"https://www.rcity.co.il/%d7%a2%d7%95%d7%93%d7%a4%d7%99%d7%9d/", cat:"furniture", intl:false, deal:"special", about:`חברתינו קיימת משנת 2004 ומתמחה בייבוא ושיווק של מיטות מעוצבות, חדרי שינה , מזרנים , ארונות וכו'.` },
+  { name:"חותם", domain:"hootam.co.il", url:"https://www.hootam.co.il/collections/%D7%A4%D7%A8%D7%99%D7%98%D7%99%D7%9D-%D7%91%D7%9E%D7%97%D7%99%D7%A8-%D7%9E%D7%99%D7%95%D7%97%D7%93", cat:"furniture", intl:false, deal:"special", about:`הרהיטים של חותם עשויים מעץ מלא ומטופלים בתהליך ייחודי ומוקפד ובגימור המותאם לתנאי מזג האוויר של ישראל. מיותר לציין כי רהיט מעץ מלא הוא פריט לכל החיים, כזה שתוכלו להוריש לנכדים, ושהזמן, כמו יין, עושה לו רק טוב` },
+  { name:"בית השטיחים", domain:"shtihim-online.co.il", url:"https://shtihim-online.co.il/product-category/%D7%A2%D7%95%D7%93%D7%A4%D7%99%D7%9D-%D7%9E%D7%A6%D7%99%D7%90%D7%95%D7%9F/", cat:"rugs", intl:false, deal:"special", about:`הקולקציה שלנו כוללת מאות שטיחים מודרניים או קלאסיים, שטיחים המיוצרים בעבודת יד או באמצעות מכונה, שטיחים מחומרים טבעיים או סינטטיים, שטיחים לכל חללי הבית או המשרד וכל זה במחירים הכי זולים שתמצאו.` },
+  { name:"Home & Co", domain:"homeandco.co.il", url:"https://homeandco.co.il/", cat:"decor", intl:false, deal:"visit", about:`אנו מבינים את החשיבות של מציאת המוצרים המושלמים והמתאימים ביותר לסגנון הייחודי שלך. זו בדיוק הסיבה שאנו ב Home & Co מייבאים ומשווקים מגוון רחב של פריטים לבית בכדי לתת מענה למגוון רחב של טעמים והעדפות` },
+  { name:"Home & More", domain:"h-more.co.il", url:"https://www.h-more.co.il/123596-%D7%9E%D7%91%D7%A6%D7%A2%D7%99%D7%9D", cat:"decor", intl:false, deal:"special", about:`רשת HOME & MORE מתמחה באביזרים משלימים לעיצוב הבית, בחנויות תוכלו למצוא החל מטכסטיל להלבשת הבית (וילונות, שטיחים, מפות שולחן, כריות נוי וכו') ועד לפריטי ריהוט משלים, אביזרי נוי ופרזול שיעניקו משמעות מיוחדת לעיצוב חדשני ועדכני משלל קולקציות שנבחרו בקפידה ע"י צוות המעצבות המוביל שלנו` },
+  { name:"Premium Deal", domain:"premiumdeal.co.il", url:"https://premiumdeal.co.il/", cat:"accessories", intl:false, deal:"special", about:`אצלנו תוכלו למצוא מוצרים ייחודיים לבית במחירים מיוחדים!` },
+  { name:"בול-בית", domain:"boolhome.com", url:"https://boolhome.com/collections/%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%94%D7%91%D7%99%D7%AA", cat:"decor", intl:false, deal:"visit", about:`בחרנו לעבוד ישירות מול ספקים נבחרים, ולוותר על רווחים מופרזים, כדי לאפשר ללקוחות שלנו להנות ממוצרים ברמה גבוהה – במחירים שפשוט אין בענף` },
+  { name:"JCR", domain:"jcr.co.il", url:"https://jcr.co.il/product-category/sale/", cat:"furniture", intl:false, deal:"sale", about:`אנו ב JCR HOME מבינים שהבית שלכם הוא הביטוי לאישיותיכם ולטעמכם הייחודיים. לכן אנו יוצאים מגדר הרגיל לספק עבורכם ריהוט ואביזרי הום סטיילינג, שבו כל פרט מעוצב בקפידה במטרה לשדרג את רמת העיצוב של ביתכם` },
+  { name:"LCP", domain:"lcp.co.il", url:"https://lcp.co.il/product-category/%D7%91%D7%99%D7%AA/", cat:"accessories", intl:false, deal:"special", about:`ב-LCP אנו שמים דגש על שקיפות מול הלקוחות. אנו מקפידים על הצגת מידע ברור לגבי מוצרים, זמני משלוח, עלויות משלוח, מדיניות החזרות ומדיניות החזרים כספיים` },
+  { name:"Joom", domain:"joom.com", url:"https://www.joom.com/he/promotions/656e572ba47cfffae34e7d83/c.1597235882987370691-42-2-2-2200405303?source=deeplink", cat:"accessories", intl:true, deal:"special", about:`מרקטפלייס ושירות קניות גלובלי באמצעות אפליקציה ואתר, שמחבר בין מוכרים וקונים, מציע מבחר אישי של מוצרים, הנחות והצעות מיוחדות, ופועל עם לוגיסטיקה איכותית ואמינה ברחבי העולם` },
+  { name:"ASHRAM", domain:"ashram.style", url:"https://ashram.style/product-category/sale/", cat:"decor", intl:false, deal:"sale", about:`עסק משפחתי קטן שמייבא ומעצב טקסטיל ייחודי מהעולם, וכיום היא נחשבת לאחת החברות המובילות בארץ שמשלבת בין אופנה עולמית לטעם הישראלי במגוון רחב של קולקציות לבית` },
+  { name:"MIGVAN", domain:"migvanalaska.com", url:"https://www.migvanalaska.com/c/%D7%9E%D7%91%D7%A6%D7%A2%D7%99%D7%9D", cat:"textiles", intl:false, deal:"special", about:`חברה ותיקה מעל 30 שנה, שמתמחה בטקסטיל איכותי לבית ורקמה ממוחשבת בהתאמה אישית, ומציעה חוויית קנייה VIP עם שירות מקצועי ואמין בחנות בירושלים` },
+  { name:"mila", domain:"milamore.co.il", url:"https://www.milamore.co.il/171258-%D7%9E%D7%91%D7%A6%D7%A2%D7%99%D7%9D", cat:"textiles", intl:false, deal:"special", about:`בית למוצרי טקסטיל ואקססוריז שגורמים לכל חלל להרגיש חמים ומזמין, עם שילוב של מחירים שקשה לנצח ואיכות שקשה להתווכח` },
+  { name:"KADO Home", domain:"kadohome.co.il", url:"https://kadohome.co.il/product-category/%d7%a8%d7%99%d7%94%d7%95%d7%98/%d7%a8%d7%99%d7%94%d7%95%d7%98-%d7%91%d7%9e%d7%91%d7%a6%d7%a2/", cat:"furniture", intl:false, deal:"special", about:`דגישה חוויית עיצוב מלאה עם פגישות אישיות עם מעצב פנים וקולקציות ייבוא בלעדיות, כולל ייצור וייבוא בהתאמה אישית לכל חלל ותקציב` },
+  { name:"HOME SET", domain:"homeset.co.il", url:"https://homeset.co.il/product-category/%d7%9e%d7%91%d7%a6%d7%a2%d7%99%d7%9d/", cat:"accessories", intl:false, deal:"special", about:`חברה ישראלית כחול-לבן שמפתחת מוצרים חכמים ופרקטיים לבית, במטרה להקל על המטלות היומיומיות ולשמור על סדר וארגון בבית` },
+  { name:"AYZEZE", domain:"ayzeze.co.il", url:"https://www.ayzeze.co.il/he/search/c.1597235882987370691-42-2-2-2200405303/q.sale", cat:"accessories", intl:false, deal:"sale", about:`אתר קניות מקוון המציע קולקציה רחבה של מוצרים באיכות גבוהה ובאחריות, במגוון קטגוריות כמו אופנה, בית, אלקטרוניקה, יופי ובריאות, עם ממשק בעברית ומשלוחים לישראל` },
+  { name:"DORI", domain:"dorihome.co.il", url:"https://dorihome.co.il/product-category/%d7%a2%d7%95%d7%93%d7%a4%d7%99%d7%9d-%d7%95%d7%aa%d7%a6%d7%95%d7%92%d7%95%d7%aa/", cat:"furniture", intl:false, deal:"special", about:`חברה ששמה דגש על אמון, שירות הגון וידע מקצועי, ומציעה מוצרים מעוצבים ואטרקטיביים שמעניקים ללקוח חוויית קנייה נעימה ומותאמת לכל בית בישראל` },
+  { name:"פרזול חצי חינם", domain:"a10.co.il", url:"https://a10.co.il/%D7%9E%D7%91%D7%A6%D7%A2%D7%99%D7%9D-%D7%97%D7%9E%D7%99%D7%9D/", cat:"accessories", intl:false, deal:"special", about:`פרזול חצי חינם הוא מותג מסחרי של לאגו שיווק בע״מ, המציע ישירות מהיבואן לצרכן מגוון עצום של מוצרי פרזול, אביזרים לבית, אמבט, מטבח, ריהוט, בטיחות ו-DIY, תוך הקפדה על מחירים תחרותיים ושירות מקצועי` },
+  { name:"Stock-Online", domain:"stock-online.co.il", url:"https://stock-online.co.il/collections/%D7%9E%D7%A6%D7%99%D7%90%D7%95%D7%9F", cat:"furniture", intl:false, deal:"special", about:`אתר קניות שמרכז אלפי רהיטים ואקססוריז לבית ולגן במחירי יבואן, במטרה לאפשר לשדרג את הבית בלי לקרוע את הכיס ועם משלוח מהיר לכל הארץ` },
+  { name:"Homax", domain:"homax.co.il", url:"https://www.homax.co.il/copy-of-%D7%9C%D7%9E%D7%A8%D7%A4%D7%A1%D7%AA-%D7%95%D7%9C%D7%92%D7%99%D7%A0%D7%94", cat:"accessories", intl:false, deal:"special", about:`מותג ריהוט ואביזרים לבית, לגן ולמשרד, המודגש בו השילוב בין שימושיות, איכות ומחירים משתלמים` },
+  { name:"TALI'S GALLERY", domain:"tali-gallery.co.il", url:"https://www.tali-gallery.co.il/142966-%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%94%D7%91%D7%99%D7%AA", cat:"decor", intl:false, deal:"special", about:`גלריה משפחתית בעיצוב והום סטיילינג במושב בצת, שמציעה פריטים ייחודיים בסגנונות שונים ונותנת חוויית ביקור ביתית עם קפה, עוגיות וייעוץ אישי להתאמת העיצוב לאופי הלקוח` },
+  { name:"Full Service", domain:"full-service.co.il", url:"https://full-service.co.il/product-category/household-goods/", cat:"accessories", intl:false, deal:"visit", about:`מותג מקבוצת מורגל, חנות אונליין ישירות מהיבואן לצרכן, המייבאת ומוכרת מגוון רחב של מוצרים לבית, שטח, קמפינג, אריזה ומתנות במחירים אטרקטיביים ובמשלוח מהיר.` },
+  { name:"ZOHAR", domain:"zoharhouse.co.il", url:"https://zoharhouse.co.il/", cat:"decor", intl:false, deal:"visit", about:`חנות ותיקה מעל 25 שנה שמלבישה את הבית עם גופי תאורה, ריהוט משלים ואקססוריז מעוצבים, תוך דגש על איכות, עיצוב ייחודי ושירות אישי עם משלוחים לכל הארץ` },
+  { name:"Terminal X", domain:"terminalx.com", url:"https://www.terminalx.com/on-sale?department_level=11720", cat:"accessories", intl:false, deal:"sale", about:`פלטפורמת אונליין ישראלית לאופנה ולייף-סטייל שמרכזת מותגים בינלאומיים ומקומיים לביגוד, הנעלה, אקססוריז, טיפוח והום דקור לנשים, גברים וילדים במקום אחד` },
+  { name:"Fine Lab", domain:"finelab.shop", url:"https://finelab.shop/collections/sale", cat:"accessories", intl:false, deal:"sale", about:`בית עיצוב שנולד מאהבה לבית ולעולם הטקסטיל, עם מוצרים כחול-לבן ברמת איכות גבוהה, בעיצוב נקי ועל-זמני שמוסיף חום וייחודיות לכל חלל` },
+  { name:"טיב העץ", domain:"tivhaetz.com", url:"https://tivhaetz.com/product-tag/%D7%91%D7%9E%D7%91%D7%A6%D7%A2%D7%99-%D7%97%D7%99%D7%A1%D7%95%D7%9C/", cat:"furniture", intl:false, deal:"special", about:`חברה עם מעל 50 שנות ניסיון בייצור, יבוא ושיווק כיסאות ופינות אוכל מעוצבות, שמציעה עיצוב אישי באיכות גבוהה ובמחירים שפויים כדי שפינת האוכל תלווה את הלקוח לאורך שנים` },
+  { name:"Shikko", domain:"shikko.com", url:"https://www.shikko.com/lobby/%D7%9E%D7%A1%D7%92%D7%A8%D7%95%D7%AA-%D7%9C%D7%AA%D7%9E%D7%95%D7%A0%D7%95%D7%AA", cat:"walls", intl:false, deal:"special", about:`מבחר הכי גדול בארץ למסגרות ולתמונות` },
+  { name:"Batico", domain:"batico.co.il", url:"https://batico.co.il/cat/sale/", cat:"accessories", intl:false, deal:"sale", about:`מרכז לעיצוב הבית והאמבט, שמגדיר עצמו כמקום שבו חלומות על בית ואמבט יפים מתגשמים, ומתמחה במוצרים ייחודיים ואיכותיים במחירים טובים במיוחד, עם שילוב של יבוא אישי ותצוגה פיזית מרשימה` },
+  { name:"GALA", domain:"gala-designs.com", url:"https://www.gala-designs.com/sale", cat:"accessories", intl:false, deal:"sale", about:`סטודיו לעיצוב פנים שמלווה לקוחות מרעיון ועד מימוש, ומתמחה הן בריהוט מלא של בית שלם והן בעיצוב חדרים בודדים לפי שרטוטי האדריכל או צוות העיצוב שלהם.` },
+  { name:"פוני פרזול", domain:"ponyp.co.il", url:"https://ponyp.co.il/%D7%9E%D7%AA%D7%A7%D7%A0%D7%99%D7%9D-%D7%9C%D7%9E%D7%98%D7%91%D7%97-%D7%95%D7%9C%D7%90%D7%A8%D7%95%D7%A0%D7%95%D7%AA-%D7%A7%D7%99%D7%A8", cat:"kitchen", intl:false, deal:"visit", about:`כל סוגי הפרזול` },
+  { name:"RUGINE", domain:"rugine.co.il", url:"https://www.rugine.co.il/product-category/%d7%9e%d7%91%d7%a6%d7%a2%d7%99%d7%9d/", cat:"accessories", intl:false, deal:"special", about:`מציעה אוסף פריטים מעוצבים ושימושיים לבית ולגינה, ובראשם שטיחי כניסה יוקרתיים עם פונקציונליות קיצונית, חומרים מעולים ועיצוב שמוסיף את הטאצ' האחרון לבית.` },
+  { name:"Magnus", domain:"magnus-shop.co.il", url:"https://magnus-shop.co.il/collections/sale", cat:"kitchen", intl:false, deal:"sale", about:`מותג שנולד מתוך תשוקה לבישול, לעיצוב ולדיוק, ומפתח ציוד מטבח מקצועי ומעוצב שנועד להפוך את הבישול והארוחה המשותפת לקלים ושמחים יותר` },
+  { name:"Afrita", domain:"myafrita.com", url:"https://myafrita.com/product-category/outlet/", cat:"accessories", intl:false, deal:"outlet", about:`חנות שמחברת בין התרבות המרוקאית העשירה לבין הבית המערבי המודרני, דרך שטיחים ואקססוריז בעבודת יד שכל אחד מהם מספר סיפור של בעלי מלאכה מקומיים` },
+  { name:"אמבט פלוס", domain:"bathplus.co.il", url:"https://www.bathplus.co.il/44600-%D7%9E%D7%91%D7%A6%D7%A2%D7%99%D7%9D-", cat:"bathroom", intl:false, deal:"special", about:`חנות מובילה בישראל לאביזרי אמבטיה עם ניסיון של למעלה מ-40 שנה ביבוא ושיווק פריטים מעוצבים, אופנתיים וחדשניים לחדר הרחצה – כדי לשדרג את האמבטיה בלי לקרוע את הכיס` },
+  { name:"KARE", domain:"kare.co.il", url:"https://kare.co.il/he/", cat:"decor", intl:false, deal:"visit", about:`מותג ריהוט ועיצוב בינלאומי שמציע רעיונות ריהוט ייחודיים, לא קונפורמיסטיים ואותנטיים, ומפתיע מאז 1981 במגוון אינסופי של פריטי ריהוט ותאורה שתופסים את העין ויוצרים חללים עם אמירה אישית חזקה` },
+  { name:"HOME STYLE", domain:"homestyle.co.il", url:"https://www.homestyle.co.il/collections/outlet", cat:"textiles", intl:false, deal:"outlet", about:`מותג טקסטיל מוביל לבית עם רשת סניפים ואתר אונליין, שמציע מצעים, מגבות, שטיחים ומוצרי הום סטיילינג באיכות גבוהה ובמגוון סגנונות המתאימים לכל אחד ולכל תקציב` },
+  { name:"הבית של עידה", domain:"store.ida-home.co.il", url:"https://store.ida-home.co.il/product-tag/outlet/", cat:"decor", intl:false, deal:"outlet", about:`אולם תצוגה וחנות בוטיק לעיצוב הבית שמוגדר כבית שלכן לעיצוב הבית, עם ליווי הום סטיילינג אישי ואווירת בית חמה לצד קולקציה אסתטית של פריטי עיצוב` },
+  { name:"רהיטי טבע", domain:"naturefurniture.co.il", url:"https://naturefurniture.co.il/product-category/outlet/", cat:"furniture", intl:false, deal:"outlet", about:`מתמחים בריהוט עץ מלא בעיצוב מודרני, ומאפשרים ליצור Mix & Match בין שולחנות, כיסאות וספסלים מעץ אלון אירופאי מלא, כך שכל לקוח בונה את השילוב ההרמוני המדויק עבורו` },
+  { name:"Zaga", domain:"zaga.co.il", url:"https://www.zaga.co.il/product-category/sale/", cat:"furniture", intl:false, deal:"sale", about:`חברה ותיקה משנת 1961 שמתמקדת בפינות אוכל, עם מפעל גדול ומתקדם בבולגריה ומוניטין של עשרות שנים, שמאפשרים לה להציע שולחנות וכיסאות באיכות גבוהה המשווקים גם בחו"ל וגם ברשת סניפים ופעילות אונליין בישראל` },
+  { name:"DreamIt", domain:"dreamitisrael.com", url:"https://www.dreamitisrael.com/collections/%D7%9E%D7%91%D7%A6%D7%A2%D7%99%D7%9D-%D7%9C%D7%A4%D7%A1%D7%97", cat:"furniture", intl:false, deal:"special", about:`חנות ישראלית לריהוט ביתי ומוסדי בקווים נקיים ומודרניים, שמתמקדת בעיצוב על-זמני, חומרים איכותיים ותמחור הוגן מהיבואן לצרכן, כך שהבית מרגיש כמו מלון בוטיק אבל במחירים נגישים` },
+  { name:"Steps Up", domain:"steps-up.co.il", url:"https://steps-up.co.il/", cat:"furniture", intl:false, deal:"visit", about:`מציעים פתרונות עיצוביים ייחודיים, רהיטים איכותיים ואווירה חמימה לכל חלל. עם מגוון רחב של מוצרים, מחויבים לתת את החוויה הטובה ביותר – מבחינת עיצוב, איכות ושירות` },
+  { name:"Umasqu", domain:"umasqu.co.il", url:"https://umasqu.co.il/collections/%D7%94%D7%98%D7%91%D7%95%D7%AA-%D7%91%D7%9C%D7%A2%D7%93%D7%99%D7%95%D7%AA", cat:"walls", intl:false, deal:"special", about:`סטודיו המציע פריטי Wall Art ועיצוב קיר אמנותיים בעבודת יד בסגנון מאוד מובחן` },
+  { name:"Urbanica", domain:"urbanica-wh.com", url:"https://www.urbanica-wh.com/home", cat:"decor", intl:false, deal:"visit", about:`חנויות ענק במתכונת One Stop Shop עם מגוון עצום של מוצרים וקטגוריות תחת קורת גג אחת, לחוויית קנייה יוצאת דופן` },
+  { name:"URBAN", domain:"urban-shop.co.il", url:"https://urban-shop.co.il/", cat:"furniture", intl:false, deal:"visit", about:`חנות רהיטים מעוצבים לבית, עם מגוון כסאות, ספות, שולחנות וכורסאות במחירים משתלמים ורשת סניפים פיזיים לצד אתר אונליין` },
+  { name:"UNITED SEATS", domain:"united-seats.com", url:"https://united-seats.com/product-category/sale/", cat:"furniture", intl:false, deal:"sale", about:`מדגישה שילוב של ותק וניסיון של מעל 20 שנה בשוק העסקי, מגוון ריהוט רחב לכל סוגי החללים ותקציבים, ואולם תצוגה עם ליווי מקצועי ואישי מרגע התכנון ועד אחרי הרכישה` },
+  { name:"Cotton Club", domain:"cottonclub.co.il", url:"https://cottonclub.co.il/collections/last-chance", cat:"textiles", intl:false, deal:"sale", about:`מותג טקסטיל אונליין שהקימו רונה וטליה, אחיות שבאו מעולם מפעל הטקסטיל המשפחתי, במטרה להציע מצעים ומגבות יפים ואיכותיים במיוחד – פרימיום נקי ואסתטי, במחירים הוגנים וללא פשרה על איכות` },
+  { name:"TOLLMAN's dot", domain:"tollmansdot.co.il", url:"https://www.tollmansdot.co.il/?s=sale", cat:"decor", intl:false, deal:"sale", about:`מבית טולמנ'ס, הוקמה כדי להנגיש את מה שמעניין בזירת העיצוב הבינלאומי העדכני, מתוך אהבה אמיתית לעיצוב ואמונה בכוח שלו ליפות את החיים ולהעלות את היום-יום רמה אחת מעל` },
+  { name:"Diamond Chef", domain:"diamondchef.co.il", url:"https://diamondchef.co.il/pages/%D7%94%D7%A0%D7%97%D7%95%D7%AA-%D7%9E%D7%91%D7%A6%D7%A2%D7%99%D7%9D-%D7%95%D7%97%D7%91%D7%99%D7%9C%D7%95%D7%AA", cat:"kitchen", intl:false, deal:"special", about:`בית לציוד מטבח מקצועי באיכות הגבוהה ביותר, גם לשוק הפרטי וגם למלונות ומסעדות, וכך מחברת בין סטנדרט פרימיום מקצועי למשתמש הביתי` },
+  { name:"shoppu", domain:"shoppu.co.il", url:"https://shoppu.co.il/collections/outlet-sale", cat:"accessories", intl:false, deal:"outlet", about:`עסק משפחתי שנולד מאהבה ליפן, והייחוד שלו הוא באיתור ידני של יותר מ-1500 פריטים יפניים מפתיעים וייחודיים – מעיצוב הבית ועד נייר, יצירה ובובות אספנות – שנבחרים בקפידה על ידי הצוות` },
+  { name:"REVOLVE", domain:"revolve.com", url:"https://www.revolve.com/sale/home-decor/br/a26e7d/", cat:"accessories", intl:true, deal:"sale", about:`מעונאית אופנה דור הבא שמבוססת על פלטפורמה דיגיטלית מחוברת-דאטה, עם מעל 110,000 סגנונות ומעל 1,400 מותגים, שמחברת קהילה של מיליוני לקוחות ואלפי אינפלואנסרים ומגדירה מחדש חוויית אופנה אונליין לדור המילניאלס ו-Z` },
+  { name:"MYKEL", domain:"mykel.shop", url:"https://www.mykel.shop/search?q=sale&type=products", cat:"decor", intl:false, deal:"sale", about:`מותג אקססוריז, עיצוב והלבשת הבית, שמאמין שהקסם בבית טמון בפרטים הקטנים – אותם פריטי דקור שנבחרים בקפידה ונותנים לבית את הטוויסט האישי` },
+  { name:"בדולינה", domain:"budulina.co.il", url:"https://budulina.co.il/product-category/sales/%d7%90%d7%95%d7%a0%d7%9c%d7%99%d7%99%d7%9f-%d7%90%d7%90%d7%95%d7%98%d7%9c%d7%98/", cat:"accessories", intl:false, deal:"outlet", about:`ממלכת רהיטים קסומה וחנות קונספט ייחודית שמחזיקה קולקציות מתחדשות של בדים ושטיחים בלעדיים רק לה, עם חוויית חנות ואונליין שמציעה מגוון פינות ישיבה, שטיחים ואקססוריז לבית בקונספט עיצובי שאין שני לו` },
+  { name:"Pix", domain:"pix.co.il", url:"https://pix.co.il/sales", cat:"walls", intl:false, deal:"sale", about:`מבית דפוס בארי, הוא אתר שהוקם כדי לאפשר לכל בעל ובעלת עסק להכין בעצמם, בקלות ובהנאה, את מוצרי הדפוס שלהם – בלי להיות תלויים במעצב חיצוני` },
+  { name:"COURTHOUSE", domain:"courthouseinteriors.com", url:"https://courthouseinteriors.com/collections/sale", cat:"accessories", intl:false, deal:"sale", about:`חלל שבו כל פינה היא הוכחה לאלגנטיות אקלקטית ושילוב שובב של סגנונות, מה שהופך את החנות לחוויה ויזואלית ייחודית ולא רק מקום לקנות בו פריטים` },
+  { name:"CASSEROLA", domain:"casserola.co.il", url:"https://casserola.co.il/product-category/sale/", cat:"accessories", intl:false, deal:"sale", about:`חנות כלי מטבח ואירוח שמביאה קולקציות מותגים נבחרות ומדגישה שירות אישי ותיאום ביקור באולם התצוגה` },
+  { name:"DAR MARRAKESH", domain:"darmarrakech.co.il", url:"https://darmarrakech.co.il/collections/sale", cat:"accessories", intl:false, deal:"sale", about:`חנות שמביאה את מיטב הפריטים המיוחדים של מרוקו בעבודת יד – אופנה, עיצוב וסידור הבית – כולם עשויים מחומרים טבעיים, באהבה ובקפדנות, מתוך רצון לתת לחומרים חיים חדשים ולבחירה שהיא טובה גם לעולם` },
+  { name:"HOME ID", domain:"home-id.co.il", url:"https://home-id.co.il/sale/", cat:"furniture", intl:false, deal:"sale", about:`נולדה מיוזמה של זוג צעיר שנבהל ממחירי עיצוב הבית, ומציעה ריהוט משלים והום סטיילינג טרנדי ואיכותי במחירים שפויים, נמוכים ב-15%–30% ממחירי השוק, כדי להנגיש עיצוב בית לכולם` },
+  { name:"TIRADOR", domain:"tiradorhd.co.il", url:"https://www.tiradorhd.co.il/188956-OUTLET", cat:"accessories", intl:false, deal:"outlet", about:`רשת המתמחה ביבוא ושיווק ריהוט משלים ומוצרים מעוצבים לבית, עם מגוון גדול לעיצוב חללים` },
+  { name:"Splendid", domain:"splendid-shop.co.il", url:"https://splendid-shop.co.il/product-category/outlet/", cat:"kitchen", intl:false, deal:"outlet", about:`חנות שנולדה מתוך חברת הפקת ועיצוב אירועים, ומייחדת את עצמה בכך שהיא מביאה לצרכן הביתי את אותם כלי שולחן ואביזרי אירוח שבהם היא משתמשת לאירועים יוקרתיים – כדי להפוך כל שולחן שבת וחג לחוויה יוצאת דופן` },
+  { name:"Suri", domain:"suri.co.il", url:"https://suri.co.il/collections/sale", cat:"accessories", intl:false, deal:"sale", about:`חנות אונליין ליודאיקה מודרנית שנולדה מהחיבור בין תל אביב לקידוש של שישי, ומטרתה לקחת מסורת של אלפיים שנה ולהפוך אותה ליצירות עיצוב שיקיות וסטייליסטיות שמנגישות את היודאיקה לדור החדש` },
+  { name:"Lala Studio", domain:"lalastudio.co.il", url:"https://lalastudio.co.il/product-category/%d7%9e%d7%91%d7%a6%d7%a2%d7%99-%d7%a1%d7%95%d7%a3-%d7%a9%d7%a0%d7%94/", cat:"accessories", intl:false, deal:"special", about:`סטודיו בוטיק שבו הילה פרמון יוצרת בעבודת יד מוצרי בטון טבעי וגולמי עם נוכחות, כך שכל פריט הוא חד-פעמי, נוצר ממגע אמיתי עם החומר ומשקף את האמונה שלה שכשהידיים עובדות – הלב נוכח` },
+  { name:"Habitat", domain:"habitatshop.co.il", url:"https://habitatshop.co.il/collections/sale-1", cat:"decor", intl:false, deal:"sale", about:`מותג ותיק ומוביל בעיצוב בינלאומי, שהוקם ב-1972 ומציע כיום אונליין אוסף מוקפד של פריטי עיצוב איכותיים ואסתטיים לבית ממותגים בינלאומיים נבחרים` },
+  { name:"Chez Mishel", domain:"chez-mishel.co.il", url:"https://chez-mishel.co.il/collections/%D7%9E%D7%97%D7%9C%D7%A7%D7%AA-%D7%A2%D7%95%D7%93%D7%A4%D7%99%D7%9D", cat:"kitchen", intl:false, deal:"special", about:`מוסד אשדודי בן יותר מ-60 שנה, שהתחיל כחנות משפחתית קטנה לכלי בית ומטבח והפך לשם דבר המשלב ציוד מקצועי למסעדות עם מבחר ענק לבית ויחס אישי של פעם` },
+  { name:"השטיח האדום", domain:"carpetshop.co.il", url:"https://www.carpetshop.co.il/pages/search-results-page?q=%D7%94%D7%A0%D7%97%D7%94", cat:"rugs", intl:false, deal:"special", about:`מותג שטיחים מוביל בישראל שמשלב מסורת משפחתית ארוכת שנים עם אתר אונליין פורץ דרך, ומציע עשרות אלפי שטיחים מכל העולם – כולל דגמים בלעדיים והזמנות אישיות – שמבטיחים להפוך כל חלל למעוצב ומרשים` },
+  { name:"ביתן המלכים", domain:"3kings.co.il", url:"https://www.3kings.co.il/?s=+%D7%94%D7%A0%D7%97%D7%94&post_type=product", cat:"accessories", intl:false, deal:"special", about:`מאחורי ביתן המלכים עומד רועי בר-טל, יזם ואיש שיווק דיגיטלי, שיצר מרקטפלייס ישראלי קפדני ומאוד אוצר, שמעניק במה למעצבים ויוצרים מקומיים לצד מוצרים ייחודיים מהעולם` },
+  { name:"ביתילי", domain:"betili-shop.com", url:"https://www.betili-shop.com/final-sale.html", cat:"decor", intl:false, deal:"sale", about:`רשת המובילה את ענף עיצוב הבית בישראל כבר 30 שנה, עם תשוקה בלתי נלאית לעיצוב, מגוון עצום לכל חללי הבית ואמינות שמגובה באחריות ושירות על כל פריט ולמעלה ממיליון קונים מרוצים` },
+  { name:"Kuala", domain:"kualastyle.com", url:"https://kualastyle.com/collections/outlet", cat:"furniture", intl:false, deal:"outlet", about:`קמה מתוך רצון לאתגר את הסטטוס קוו בעולם הריהוט, ומשלבת עיצוב מוקפד, פונקציונליות ואיכות יחד עם מערך לוגיסטי מתקדם וחוויית קנייה שמרגישה כמו בבית – כדי ליצור את רגע החיוך כשמניחים את הרהיט במקום` },
+  { name:"Pampas Mood", domain:"pampas-mood.co.il", url:"https://pampas-mood.co.il/product-category/sale/", cat:"accessories", intl:false, deal:"sale", about:`סטודיו בוטיק שמייצר מארזי מתנות וזרים מלאי השראה עם דגש על אסתטיקה, ריח ואיכות, ונולד מאהבה לאנשים, פרחים ולדברים יפים שמייצרים אווירה` },
+  { name:"Kitan", domain:"kitan.co.il", url:"https://www.kitan.co.il/outlet", cat:"textiles", intl:false, deal:"outlet", about:`אחת מחברות הטקסטיל המובילות והוותיקות בישראל, שמזוהה במיוחד עם מצעים איכותיים לחדר השינה תחת הסיסמה על איכות לא מתפשרים` },
+  { name:"Passparto", domain:"passparto.co.il", url:"https://www.passparto.co.il/collections/%D7%9E%D7%91%D7%A6%D7%A2%D7%99%D7%9D", cat:"textiles", intl:false, deal:"special", about:`מותג שמתמקד במוצרי טקסטיל לחדר שינה מסודר ונעים, עם דגש על פתרונות נוחות ושינה איכותית` },
+  { name:"מצעים בקליק", domain:"mazhaimbeclick.co.il", url:"https://www.mazhaimbeclick.co.il/sale/", cat:"textiles", intl:false, deal:"sale", about:`חנות אונליין למצעים, מגבות, כלי מיטה ואביזרי עריכת שולחן, שמציעים עיצוב ביתי אסתטי עם דגש על איכות גבוהה ומחירים משתלמים לכל הארץ` },
+  { name:"Okoa", domain:"okoa.store", url:"https://okoa.store/collections/25", cat:"decor", intl:false, deal:"sale", about:`מותג ישראלי לעיצוב הבית שמציע מוצרים קלאסיים, אסתטיים ואיכותיים במחיר נגיש, שנבחרים בקפידה כדי להוסיף חמימות ויופי לכל פינה בבית לאורך זמן.` },
+  { name:"Collectie", domain:"collectie.co.il", url:"https://www.collectie.co.il/collections/sale", cat:"decor", intl:false, deal:"sale", about:`מותג ישראלי מקורי לעיצוב ויצור מוצרי עיצוב וריהוט פנים. מוצרי collectie מעוצבים ומיוצרים בבית המלאכה של הסטודיו` },
+  { name:"Yahalomis", domain:"yahalomis.com", url:"https://www.yahalomis.com/he/home-accessories", cat:"accessories", intl:false, deal:"visit", about:`חנות אונליין שמציעה יודאיקה מודרנית ועיצוב לבית עם דגש על נגיעה של יופי ועולם של משמעות, כמו בתי מזוזה וכלי שולחן מעוצבים` },
+  { name:"The Collection", domain:"decor2home.com", url:"https://www.decor2home.com/collections/remaining-stocks-clearance-sale", cat:"accessories", intl:false, deal:"sale", about:`חברת יבוא ואקססוריז לבית הפועלת כ-30 שנה, שמביאה לישראל קולקציות אגרטלים וכלי זכוכית ייחודיים וממוחזרים מחברות אירופיות מובילות, עם דגש על איכות, אומנות וחוויית עיצוב מעוררת השראה` },
+  { name:"1 Item", domain:"1item.co.il", url:"https://www.1item.co.il/", cat:"decor", intl:false, deal:"visit", about:`אתר שמציע כל מה שצריך לעיצוב הבית בסטייל עד 99 ₪, עם משלוח עד הבית ודגש על רענון הבית במחירים נגישים במיוחד` },
+  { name:"העץ הנדיב", domain:"nadivwood.co.il", url:"https://nadivwood.co.il/collections/sale", cat:"furniture", intl:false, deal:"sale", about:`מותג ריהוט ואביזרי עץ מלא שמציע פרגודים, פסלים, שולחנות צד, סלי אחסון ועוד, עם אופי בוטיקי ושני סניפים פיזיים (רחובות וראשון לציון) לצד אתר אונליין` },
+  { name:"Sofi", domain:"sofi-design.co.il", url:"https://sofi-design.co.il/collections/sale", cat:"accessories", intl:false, deal:"sale", about:`חנות ביפו שמלקטת פריטים לעיצוב הבית שנבחרו בקפידה להוסיף אופי, רוגע וקסם – כלים למטבח, דקורציה, טקסטיל ואזות שיוצרים אווירה חמימה בבית` },
+  { name:"נושא כלים", domain:"nosekelim.com", url:"https://www.nosekelim.com/sales", cat:"decor", intl:false, deal:"sale", about:`חנות עיצוב הבית שמציעה דברים יפים לבית – כלי בית, מתנות, אקססוריז, טקסטיל ועציצים – עם דגש על פריטים מעוצבים במחירים נוחים` },
+  { name:"הגלריה המקסיקנית", domain:"mexican-gallery.co.il", url:"https://mexican-gallery.co.il/product-category/sale-%d7%9e%d7%91%d7%a6%d7%a2%d7%99%d7%9d-%d7%a8%d7%90%d7%a9%d7%99/", cat:"furniture", intl:false, deal:"sale", about:`חנות רהיטים ואביזרי עיצוב לבית שבוחרת בקפידה פריטים מכל העולם, רבים בעבודת יד וביבוא אישי, כדי ליצור בית מלא סטייל, אור ואיכות שמרגישים בכל פינה` },
+  { name:"הום סנטר", domain:"homecenter.co.il", url:"https://www.homecenter.co.il/collections/monthly", cat:"allhome", intl:false, deal:"special", about:`הרשת הגדולה והמובילה בישראל בתחום שיפור ותחזוקת הבית, מחלוצות ה-DIY בארץ, עם אלפי מוצרים לבית ולגן וקונספט One stop shop תחת קורת גג אחת` },
+  { name:"Fox Home", domain:"foxhome.co.il", url:"https://www.foxhome.co.il/collections/last-chance", cat:"decor", intl:false, deal:"special", about:`רשת לייף-סטייל לבית עם 99 חנויות בכל הארץ, שמטרתה להעשיר את סגנון החיים בעזרת מוצרי בית אופנתיים במחירים טובים, ולאפשר לכל אחד לעצב את הבית שלו לפי הסיפור האישי` },
+  { name:"Golf & Co", domain:"golfco.co.il", url:"https://www.golfco.co.il/70-off", cat:"decor", intl:false, deal:"special", about:`רשת ותיקה לעיצוב הבית שמגדירה עצמה כמקום שבו תמצאו את כל מה שהבית שלכם צריך – מצעים, מגבות, כלי אוכל, אביזרי אמבטיה ועוד, בסגנון נעים ומוכר` },
+  { name:"Mashbir365", domain:"mashbir.co.il", url:"https://365mashbir.co.il/collections/%D7%A2%D7%95%D7%9C%D7%9D-%D7%94%D7%91%D7%99%D7%AA-outlet", cat:"textiles", intl:false, deal:"outlet", about:`רשת בתי הכלבו הגדולה בישראל בה ניתן למצוא מגוון ענק של מותגים בינלאומיים וקולקציות נבחרות` },
+  { name:"ACE", domain:"ace.co.il", url:"https://www.ace.co.il/acesale", cat:"allhome", intl:false, deal:"sale", about:`אתר של רשת עשה-זאת-בעצמך ושדרוג הבית, שמרכז במקום אחד ריהוט, מוצרי גינה, חשמל, רכב ופתרונות אחסון – עם דגש חזק על מבצעים והנחות עונתיות אונליין.` },
+  { name:"Next", domain:"next.co.il", url:"https://www.next.co.il/he/shop/home/f/department-homeware-feat-sale?p=1#0", cat:"textiles", intl:false, deal:"sale", about:`מעונאית בריטית גדולה לאופנה ולבית, שמוכרת אונליין ובעשרות מדינות, ומזוהה עם בגדים וריהוט בית במחירים נגישים ועיצוב עכשווי` },
+  { name:"H&M", domain:"hm.com", url:"https://www2.hm.com/hw_il/home/shop-by-product/decorations/view-all.html", cat:"accessories", intl:false, deal:"visit", about:`קבוצת אופנה גלובלית שמספרת את סיפורה כמעבר מחנות אחת בווסטרוס לשחקנית בינלאומית, עם חזון אופנה ואיכות במחיר הטוב ביותר, בצורה בת-קיימא` },
+  { name:"Castro", domain:"castro.com", url:"https://www.castro.com/%D7%91%D7%99%D7%AA/%D7%94%D7%96%D7%93%D7%9E%D7%A0%D7%95%D7%AA-%D7%90%D7%97%D7%A8%D7%95%D7%A0%D7%94", cat:"decor", intl:false, deal:"special", about:`אחד ממותגי האופנה הישראלים המובילים, שמציע אופנה עדכנית לנשים, גברים וילדים, ומזוהה עם עיצוב ישראלי, קולקציות מתחלפות וחיבור חזק לסצנת האופנה המקומית` },
+  { name:"Zara Home", domain:"zarahome.com", url:"https://www.zarahome.com/il/%D7%A2%D7%99%D7%A6%D7%95%D7%91-n989?celement=1020654514", cat:"decor", intl:true, deal:"visit", about:`מותג הום דקור בינלאומי שמציע טקסטיל, אביזרי אמבטיה, מטבח ודקורציה בסגנון אופנתי, עם יכולת להגיב מהר לטרנדים ולספק מוצרי איכות במחירים סבירים` },
+  { name:"Amazon", domain:"amazon.com", url:"https://www.amazon.com/s?k=home+decor", cat:"decor", intl:true, deal:"visit", about:`אחת מפלטפורמות האי-קומרס הגדולות בעולם, עם קשת עצומה של מוצרים ושירותים דיגיטליים, לוגיסטיקה מתקדמת ומודל שמגדיר מחדש קניות אונליין` },
+  { name:"IKEA", domain:"ikea.com", url:"https://www.ikea.com/il/he/offers/limited-time-offers/", cat:"decor", intl:true, deal:"special", about:`ענקית ריהוט שוודית עם חזון ליצור חיי יום-יום טובים יותר לרוב האנשים, ומיישמת אותו דרך ריהוט פונקציונלי ומעוצב במחירים נמוכים ככל האפשר כדי שיהיה נגיש לכמה שיותר בתים` },
+  { name:"Anthropologie", domain:"anthropologie.com", url:"https://www.anthropologie.com/anthrohome/collection-sale-house-home", cat:"accessories", intl:true, deal:"sale", about:`רשת לייף-סטייל שנוסדה ב-1992 ומציעה שילוב אוצרותי של אופנה, אקססוריז, ביוטי וריהוט/הום דקור, עם סגנון בוהו-אמנותי ייחודי כחלק מקבוצת URBN` },
+  { name:"Urban Outfitters", domain:"urbanoutfitters.com", url:"https://www.urbanoutfitters.com/home-decor-sale?category_button=1", cat:"accessories", intl:true, deal:"sale", about:`צמחה מחנות קטנה ליד אוניברסיטה למותג לייף-סטייל בינלאומי כחלק מ-URBN, עם דגש על אופנה, עיצוב בית ותרבות לצעירים וסטודנטים, בסגנון אורבני וטרנדי` },
+  { name:"Society6", domain:"society6.com", url:"https://society6.com/collections/sale", cat:"accessories", intl:true, deal:"sale", about:`פלטפורמת Print-on-Demand שבה אמנים מעלים עבודות, והאתר מטפל בהדפסה, אריזה ומשלוח על מגוון מוצרי הום דקור ואקססוריז – וכך מאפשר לאמנים הכנסה על כל מכירה` },
+  { name:"Oliver Bonas", domain:"oliverbonas.com", url:"https://www.oliverbonas.com/sale/category/homeware", cat:"accessories", intl:true, deal:"sale", about:`מותג לייף-סטייל בריטי עצמאי, שמתמחה בעיצוב ייחודי משלו לאופנה ולהום-וור, עם יותר מ-90 חנויות, ומצהיר שהמשימה שלו היא לעשות את החיים קצת יותר שמחים דרך עיצוב מעורר השראה` },
+  { name:"Pottery Barn", domain:"potterybarn.com", url:"https://www.potterybarn.com/shop/sale/exclusive-savings/", cat:"decor", intl:true, deal:"sale", about:`קמעונאי ריהוט אמריקאי שנוסד ב-1949 בסן פרנסיסקו, ומציע ריהוט, טקסטיל והום דקור בסגנון קלאסי-אמריקאי לבית שלם.` },
+  { name:"Marks & Spencer", domain:"marksandspencer.com", url:"https://www.marksandspencer.com/il/l/home/", cat:"decor", intl:true, deal:"visit", about:`קמעונאי בריטי ותיק מ-1884 שמתמחה בביגוד, מוצרי בית ומזון פרימיום, עם מאות סניפים בבריטניה ומוניטין של איכות ושירות` },
+  { name:"KARL LOUIS", domain:"klkl.co.il", url:"https://klkl.co.il/search?type=product&options%5Bunavailable_products%5D=last&options%5Bprefix%5D=none&q=sale*", cat:"decor", intl:false, deal:"sale", about:`מותג ישראלי ותיק המציע מגוון פתרונות איכותיים ומעוצבים לבית, לארגון, לקמפינג ולנסיעות, במחירים משתלמים למשפחה הישראלית` },
+  { name:"SAGE", domain:"sage-tlv.com", url:"https://sage-tlv.com/product-category/50-sale/", cat:"decor", intl:false, deal:"sale", about:`גלריה לריהוט ולייף-סטייל בסמטאות שוק הפשפשים, שמציעה מבחר ריהוט ופרטי עיצוב ייחודיים בחוויה בוטיקית.` },
+  { name:"רהיטי דורון", domain:"doron-home.co.il", url:"https://www.doron-home.co.il/", cat:"furniture", intl:false, deal:"visit", about:`חברה פרטית ותיקה שמייצרת ומשווקת חדרי ילדים ונוער, ארונות הזזה וריהוט למשרד הביתי, וגם מחזיקה במותג BATIO לארונות אמבטיה` },
+  { name:"Balleno", domain:"bellano.co.il", url:"https://bellano.co.il/category/sale", cat:"furniture", intl:false, deal:"sale", about:`חנות רהיטים אונליין שמדגישה שילוב של עיצוב שעושה וואו, איכות גבוהה והתאמה אישית מלאה (מידות, צבעים ומבנה) – כדי שכל לקוח יקבל רהיט שתפור בדיוק עליו, במחירים מפתיעים לטובה` },
+  { name:"BAMBOO", domain:"bamboo.co.il", url:"https://www.bamboo.co.il/c/24", cat:"furniture", intl:false, deal:"sale", about:`אתר רהיטים ישראלי המציע מגוון רחב של רהיטים לבית, למשרד ולעסק, הניתנים לבחירה והזמנה אונליין במחירים נגישים ובשירות משלוחים מהיר` },
+  { name:"Studio SortA", domain:"sorta.co.il", url:"https://sorta.co.il/collections/all", cat:"accessories", intl:false, deal:"special", about:`סטודיו לעיצוב הבית שמייצר מנורות ואובייקטים באמצעות הדפסה בתלת-ממד, עם דגש על קיימות, אסתטיקה ועבודת יד אישית מכל הלב` },
+  { name:"CasaBella", domain:"casabella.co.il", url:"https://casabella.co.il/collections/%D7%97%D7%A0%D7%95%D7%9B%D7%94-%D7%A1%D7%99%D7%99%D7%9C", cat:"accessories", intl:false, deal:"sale", about:`מותג ישראלי לעיצוב והלבשת שולחן והבית, המציע קולקציות פריטים מעוצבים לאירוח, בישול וריח לבית, עם דגש על סטייל יוקרתי, פונקציונליות ושירות אונליין כולל משלוחים לכל הארץ.` },
+  { name:"Decorado", domain:"decorado.co.il", url:"https://www.decorado.co.il/category/%D7%9E%D7%91%D7%A6%D7%A2%D7%99%D7%9D", cat:"accessories", intl:false, deal:"special", about:`יבואנית ויצרנית נרות ומוצרי אווירה, שמתמחה בנרות ריחניים, ריחות ואקססוריז לעיצוב הבית, חללים, שולחנות ואירועים` },
+  { name:"עד עיצובים", domain:"matana.org.il", url:"https://www.matana.org.il/cat/sale/", cat:"decor", intl:false, deal:"sale", about:`פריטים מעוצבים שנבחרו בקפידה, עם דגש על שילובים הרמוניים בין חומרים, צבעים וטקסטורות. בהשראה ממקומות שונים בעולם, לצד חיבור עמוק לעיצוב ישראלי טבעי ומזמין` },
+  { name:"EQUIP", domain:"equip-online.co.il", url:"https://equip-online.co.il/", cat:"kitchen", intl:false, deal:"visit", about:`אתר האונליין של חברת אקיפ, החברה היחידה בישראל שנותנת שירות One Stop Shop לציוד תפעולי לבתי מלון ואירוח – מהציוד למחלקות מזון ומשקאות ועד ריהוט מלונאי – עם מגוון רחב ליבוא ושיווק לקניינים ויזמים` },
+  { name:"Come Home", domain:"come-home.co.il", url:"https://come-home.co.il/", cat:"accessories", intl:false, deal:"visit", about:`התחושה שאנו שואפים ליצור היא חיבור לרגעים הקטנים של החיים, בעזרת פריטים דקורטיביים שמוסיפים לבית תחושת נוחות, סטייל ורוגע` },
+  { name:"Venus", domain:"venus-home.co.il", url:"https://venus-home.co.il/", cat:"furniture", intl:false, deal:"visit", about:`אנו ב-Venus מתחייבים לשרות הטוב והאדיב ביותר, לאספקה מהירה ולאחריות מלאה על כל מוצרינו, מתוך רצון להעניק ללקוחות חוויית קנייה ייחודית שבה הם תמיד במקום הראשון.` },
+  { name:"bring", domain:"bringithome.co.il", url:"https://www.bringithome.co.il/", cat:"decor", intl:false, deal:"visit", about:`מותג ישראלי לעיצוב הבית בסגנון נורדי-סקנדינבי שמייצר פריטים פונקציונליים ואיכותיים המשלבים אסתטיקה מינימליסטית עם עמידות גבוהה לחיי היומיום` },
+  { name:"ROSSO ITALY", domain:"slimprice.co.il", url:"https://www.slimprice.co.il/", cat:"furniture", intl:false, deal:"visit", about:`אתר מכירות ישראלי שנועד להוריד את יוקר המחיה באמצעות מכירת ריהוט ומוצרים לבית, משרד וספורט במחירים מהנמוכים בישראל, ישירות מהיבואן הרשמי של ROSSO ITALY, תוך התחייבות לאיכות, שירות ואבטחת קנייה מלאה.` },
+  { name:"רבדים", domain:"revadimil.co.il", url:"https://www.revadimil.co.il/", cat:"furniture", intl:false, deal:"visit", about:`מותג רהיטים אונליין, שלוחה של חברת ריהוט ותיקה, המציע ריהוט מעוצב בקו מודרני המיוצר באירופה לפי דרישות העיצוב שלהם, במחירים נוחים לכל כיס` },
+  { name:"מרבדים", domain:"marvadim.com", url:"https://www.marvadim.com/product-category/outlet-store/", cat:"rugs", intl:false, deal:"outlet", about:`במרבדים מאמינים שהקירות בבית יכולים להיראות כמו גלריה לאומנות, ולכן רכשו זכויות על מגוון עצום של יצירות מקוריות ומייצרים לכל לקוח שטיחים ותמונות בהדפסה איכותית לפי הזמנה` },
+  { name:"WINDOWS ART", domain:"windowsart.co.il", url:"https://windowsart.co.il/product-category/%D7%9E%D7%91%D7%A6%D7%A2%D7%99%D7%9D/", cat:"decor", intl:false, deal:"sale", about:`מותג און-ליין לעיצוב וטקסטיל לבית, שהוקם מתוך תשוקה לאסתטיקה ומציע פריטים יפים ונגישים במחירים הוגנים, עם שירות אישי ואכפתי וחוויית קנייה נעימה` },
+  { name:"Click&Buy", domain:"clickandbuy.co.il", url:"https://www.clickandbuy.co.il/category/%D7%97%D7%99%D7%A1%D7%95%D7%9C-%D7%9E%D7%9C%D7%90%D7%99", cat:"furniture", intl:false, deal:"sale", about:`קניון רהיטים וירטואלי המתמחה בריהוט איכותי ומעוצב לבית ולמשרד, המציע מבחר גדול, מחירים תחרותיים, משלוחים לכל הארץ ושירות אישי ובטוח אונליין.` },
+  { name:"RAZCO", domain:"razco.co.il", url:"https://razco.co.il/%D7%9E%D7%91%D7%A6%D7%A2%D7%99%D7%9D", cat:"furniture", intl:false, deal:"sale", about:`מותג ריהוט ופתרונות אחסון המיובאים ממיטב היצרנים בעולם ונמכרים ישירות לצרכן ללא פערי תיווך, תוך הקפדה על מחירים הוגנים, שירות איכותי ומשלוח עד הבית` },
+  { name:"STOOLS", domain:"stools.co.il", url:"https://stools.co.il/product-category/%D7%A8%D7%94%D7%99%D7%98%D7%99%D7%9D-%D7%91%D7%9E%D7%91%D7%A6%D7%A2/", cat:"furniture", intl:false, deal:"sale", about:`מותג און-ליין לריהוט מעוצב לבית ולגן, המתמחה בכסאות בר ומוצרים משלימים, ופועל לפי חזון של חוויית קנייה אינטרנטית נגישה, שירות זמין ומקצועי ומחירים אטרקטיביים` },
+  { name:"SIMPLY WOOD", domain:"simply-wood.co.il", url:"https://simply-wood.co.il/%d7%9e%d7%95%d7%a6%d7%a8%d7%99%d7%9d-%d7%91%d7%9e%d7%91%d7%a6%d7%a2/", cat:"furniture", intl:false, deal:"sale", about:`חברת ריהוט בוטיק ותיקה שממקדת את תכנון הרהיטים בהנדסת אנוש ונוחות, שומרת כבר כ-30 שנה על סטנדרט איכות מוקפד, ומחזיקה בתו אמון הציבור תוך לקיחת אחריות מלאה גם על טעויות אפשריות` },
+  { name:"YA'AD יעד", domain:"pirzul.co.il", url:"https://pirzul.co.il/product-category/sale-24c503d5/", cat:"accessories", intl:false, deal:"sale", about:`יעד פרזול, בעלת למעלה מ-50 שנות פעילות, התפתחה מספקית פרזול לתעשיית הרהיטים לרשת חנויות ומותג לצרכן הסופי, המתמקד כיום במוצרים דקורטיביים לעיצוב הבית והריהוט` },
+  { name:"MIADERA", domain:"miadera.co.il", url:"https://www.miadera.co.il/?s=%D7%97%D7%A1%D7%9B%D7%95%D7%9F", cat:"furniture", intl:false, deal:"special", about:`חנות רהיטים מהיבואן לצרכן שמביאה לבית ריהוט בעיצוב אירופאי המותאם לטעם הישראלי, כדי לאפשר לכל אחד בית מעוצב ונעים במחיר נגיש ואספקה לכל הארץ` },
+  { name:"TWOM", domain:"twom.co.il", url:"https://twom.co.il/product-category/sale/", cat:"decor", intl:false, deal:"sale", about:`בית לפריטי עיצוב ייחודיים מהארץ ומהעולם, שנולד מחלום של שתי חובבות עיצוב להקים סטודיו מלא בפריטים שתתאהבו בהם ותרצו לקחת הביתה` },
+  { name:"STUDIO ENSO", domain:"ensostudio.co.il", url:"https://ensostudio.co.il/he/collections/sale", cat:"accessories", intl:false, deal:"sale", about:`סטודיו לעיצוב פנים והלבשת הבית בסגנון ג׳פנדי (יפני-סקנדינבי), שמייבא בקפידה פריטים מאירופה ומיפן כדי ליצור חוויית עיצוב הוליסטית לגוף, לבית ולנפש` },
+  { name:"SUPER HOME", domain:"superhome.co.il", url:"https://superhome.co.il/collections/sale", cat:"allhome", intl:false, deal:"sale", about:`סופר הום היא חברת יבוא ומכירה של מוצרים איכותיים למטבח ולבית ממיטב המותגים בעולם, ששמה דגש על איכות, מגוון גדול ומתן שירות אופטימלי ללקוח` },
+  { name:"BLUE Bandana", domain:"bluebandana.co.il", url:"https://bluebandana.co.il/he/collections/further-sale-all-2025", cat:"accessories", intl:false, deal:"sale", about:`מותג ותיק שהוקם ב-1993 על ידי לימור גורלי ובטי גהורזם, והפך לשם מוכר בסצנת העיצוב הישראלית עם חנויות המשלבות תפיסת עיצוב ייחודית ואישית` },
+  { name:"Oli", domain:"olihomedecor.co.il", url:"https://olihomedecor.co.il/product-category/%d7%a4%d7%99%d7%a0%d7%aa-%d7%94%d7%9e%d7%a6%d7%99%d7%90%d7%95%d7%9f-%d7%a9%d7%9c-oli/", cat:"decor", intl:false, deal:"sale", about:`סטודיו משפחתי המשלב אומנות ופריטים מיוחדים, שילוב בין העיצוב הכפרי והעיצוב המודרני, וזאת ממקום של ייחודיות ויצירתיות - מה שמעניק לכל פריט ולכל תהליך יצירה - נופך אישי וחם` },
+  { name:"אסופה", domain:"asufadesign.co.il", url:"https://asufadesign.co.il/", cat:"accessories", intl:false, deal:"visit", about:`אסופה הוקמה ב-2012 במטרה להיות בית לעיצוב ישראלי מקורי, צעיר וחדש, ומאגדת בחנויותיה ובאתרה מעל מאה מעצבים ויוצרים מקומיים תחת קורת גג אחת` },
+  { name:"nisha", domain:"nishadecor.co.il", url:"https://www.nishadecor.co.il/shop/?on_sale=1", cat:"accessories", intl:false, deal:"sale", about:`חנות ומותג אונליין לאקססוריז לבית וכלי מטבח, שנולדו מתוך אהבה לעיצוב, סדר ופרקטיות, ומציעה מוצרים טרנדיים וייחודיים במלאים מוגבלים וחוויית קנייה נוחה ובטוחה` },
+  { name:"ALASKA", domain:"alaskastyle.co.il", url:"https://alaskastyle.co.il/product-category/up-to-50-sale/", cat:"furniture", intl:false, deal:"sale", about:`מותג ריהוט און-ליין ישראלי שנולד בעידן הקורונה, ומתמחה ברהיטי יוקרה מעוצבים המיוצרים בישראל, עם דגש על סטייל עכשווי, איכות גבוהה וחוויית קנייה אינטרנטית בטוחה שמצמצמת את הפער בין התמונה למוצר בפועל.` },
+  { name:"Ambatika", domain:"ambatikashop.co.il", url:"https://www.ambatikashop.co.il/", cat:"bathroom", intl:false, deal:"visit", about:`קולקציה מגוונת וחדשנית של ארונות אמבטיה, מקלחונים, כיורים, ברזים ואביזרים. שילוב של יוקרה, סגנון ומקוריות, סטייל, ואיכות במחיר ללא תחרות – יש דבר כזה והוא ממש כאן אצלנו` },
+  { name:"Sheepy", domain:"sheepyby.com", url:"https://sheepyby.com/product-category/new/", cat:"furniture", intl:false, deal:"visit", about:`מותג און-ליין ישראלי המייצר ומשווק רהיטי מתכת ומוצרים מעוצבים לבית ולמשרד, עם דגש על ייצור מקומי כחול-לבן, קווים נקיים והתאמה אישית של פריטים ישירות מהמפעל לבית הלקוח.` },
+  { name:"Home & Fashion", domain:"homeandfashion.co.il", url:"https://homeandfashion.co.il/", cat:"decor", intl:false, deal:"visit", about:`חברה ישראלית המתמחה בריהוט ומוצרי עיצוב לבית, המשלבת ייצור מקומי וייבוא כדי להציע מגוון מוצרים איכותיים לכל המשפחה במחירים אטרקטיביים ובשירות מקצועי ואדיב.` },
+  { name:"Lalou Shik", domain:"laloushik.co.il", url:"https://laloushik.co.il/collections/sale", cat:"decor", intl:false, deal:"sale", about:`מותג ריהוט ישראלי בעבודת יד, היוצר רהיטים מעץ מלא המשלבים כפריות חמה וקווים מודרניים כדי להכניס לבית נוכחות, נשמה ואופי אישי יחד עם יחס חם וליווי צמוד` },
+  { name:"napo", domain:"napo.co.il", url:"https://www.napo.co.il/", cat:"decor", intl:false, deal:"visit", about:`מותג צעיר, איכותי וצבעוני לעיצוב הבית שמציע רהיטים מעוצבים לחדר שינה וסלון בהשראת אנשים, עם חוויית קנייה אונליין נוחה, תקופת ניסיון על מזרנים, משלוח מהיר ושירות לקוחות מקיף` },
+  { name:"ידו", domain:"yado.co.il", url:"https://yado.co.il/", cat:"decor", intl:false, deal:"visit", about:`ידו הוא מרקטפלייס אונליין ליצירה ישראלית בעבודת יד, שנועד לחבר בין אמנים ומעצבים מקומיים לקהל שמחפש פריטים ייחודיים עם סיפור, איכות וחיבור אנושי מאחורי כל מוצר` },
+  { name:"Home Online", domain:"homeonline.co.il", url:"https://www.homeonline.co.il/category/sale", cat:"decor", intl:false, deal:"sale", about:`מכירה ישראלי לריהוט ואביזרים לבית המציע מגוון מוצרים לעיצוב הבית, המטבח, הגינה וחדר האמבטיה, עם דגש על מחירים הוגנים, מוצרים מקוריים, שירות אדיב וקנייה מאובטחת.` },
+  { name:"KUADROS", domain:"kuadros.com", url:"https://kuadros.com/he", cat:"walls", intl:false, deal:"visit", about:`יותר מ-300 אמנים מקצועיים מציירים את היצירה המועדפת עליך עם איכות מובטחת` },
+  { name:"Melach Haaretz", domain:"melach-haaretz.co.il", url:"https://melach-haaretz.co.il/sale/", cat:"decor", intl:false, deal:"sale", about:`עיצוב אישי. תתכוננו להתאהב` },
+  { name:"HUIZE", domain:"huize.co.il", url:"https://huize.co.il/", cat:"accessories", intl:false, deal:"visit", about:`כשיופי פוגש פונקציונאליות` },
+  { name:"SHEIN", domain:"m.shein.com", url:"https://m.shein.com/il/Home-Decor-c-1954.html", cat:"accessories", intl:true, deal:"visit", about:`אתר קמעונאי גלובלי המציע מגוון עצום של מוצרי בית והלבשת הבית (דקורציה, טקסטיל, אחסון, מטבח, כלי עבודה ועוד) במחירים נגישים, עם משלוחים לישראל וריבוי דילים יומיים` },
+  { name:"הנמל GROUP", domain:"nammalonline.co.il", url:"https://www.nammalonline.co.il/product-category/last-chance/", cat:"decor", intl:false, deal:"special", about:`מותג רהיטים ישראלי ותיק המתמחה בייצור, יבוא ושיווק רהיטים מעוצבים ואיכותיים, עם אולמות תצוגה גדולים, מחלקת פרויקטים ומיקוד בחוויית קנייה מושלמת ושירות מקצועי.` },
+  { name:"GRAND LARSO", domain:"larso.co.il", url:"https://larso.co.il/%D7%A7%D6%B8%D7%98%D6%B5%D7%92%D7%95%D6%B9%D7%A8%D6%B4%D7%99%D6%B8%D7%94/%d7%9e%d7%91%d7%a6%d7%a2%d7%99%d7%9d/", cat:"furniture", intl:false, deal:"special", about:`בואו ליהנות מריהוט איכותי שמשדרג כל חדר. מאות לקוחות כבר בחרו בשילוב המנצח של שירות אמין, יחס אישי ומחיר הוגן. עכשיו תורכם` },
+  { name:"Merci", domain:"merci-homedecor.co.il", url:"https://www.merci-homedecor.co.il/search/?q=sale", cat:"decor", intl:false, deal:"sale", about:`מותג בוטיק לעיצוב והלבשת הבית, המציע כלים יוקרתיים, ריהוט ואקססוריז מיוחדים בהשראת Merci Paris בגלריה וברשת, עם ליווי אישי בגיבוש רעיונות לעיצוב הבית.` },
+  { name:"WOODY", domain:"woodyil.co.il", url:"https://woodyil.co.il/", cat:"furniture", intl:false, deal:"special", about:`Electric Style המתמחה בייבוא ישיר של ריהוט בעיצוב מודרני, באיכות גבוהה ובמחירים נגישים לכל בית, עם הקפדה על פונקציונליות, אסתטיקה ושירות מקיף מהקטלוג ועד ההובלה וההרכבה.` },
+  { name:"Daniel Light Design", domain:"danielightdesign.co.il", url:"https://danielightdesign.co.il/product-category/brass-lighting-fixtures/brass-lighting-fixtures-sale/", cat:"lighting", intl:false, deal:"sale", about:`מותג בוטיק לגופי תאורה כפריים-מודרניים מפליז בעבודת יד, עם בית מלאכה וחנות בעמק חפר, המתמחה בעיצוב וייצור בהתאמה אישית ללקוחות פרטיים ואנשי מקצוע.` },
+  { name:"הבית המרוקאי", domain:"moroccan-home.co.il", url:"https://moroccan-home.co.il/product-category/%d7%97%d7%99%d7%a1%d7%95%d7%9c-%d7%9e%d7%9c%d7%90%d7%99-%d7%a2%d7%93-50-%d7%94%d7%a0%d7%97%d7%94/", cat:"accessories", intl:false, deal:"sale", about:`הבית המרוקאי הוא מותג ישראלי ליבוא ומכירת ריהוט והום סטיילינג מרוקאי אותנטי בעבודת יד, המגיע ישירות מבתי המלאכה במרוקו ומוסיף לבית אווירה חמה ואקזוטית` },
+  { name:"Lights of Scandinavia", domain:"lightsofscandinavia.com", url:"https://lightsofscandinavia.com/collections/best-deals", cat:"lighting", intl:true, deal:"special", about:`מותג סקנדינבי לתאורה לבית ולחוץ, המציע גופי תאורה מודרניים ואיכותיים (תלייה, תקרה, קיר, רצפה וחוץ) עם דגש על עיצוב, אווירה ואור פונקציונלי לחללים שונים.` },
+  { name:"We Light", domain:"wlight.co.il", url:"https://wlight.co.il/product-category/sale-products/", cat:"lighting", intl:false, deal:"sale", about:`מותג ישראלי המתמחה בייבוא, שיווק ומכירת גופי תאורה ומאווררי תקרה ישירות מהיבואן לצרכן, עם מבחר גדול לכל סגנון וטעם (מודרני, קלאסי, כפרי ווינטג') וחוויית קנייה אונליין מודרנית ושירות מקצועי` },
+  { name:"CASA MIA", domain:"casa-mia.co.il", url:"https://www.casa-mia.co.il/sale/", cat:"decor", intl:false, deal:"sale", about:`מותג ישראלי לעיצוב הבית, שמעל עשור מביא רהיטי עץ מלא, חומרים טבעיים ופריטי נוי ייחודיים ממזרח אסיה, עם חוויית קנייה אישית אונליין ובחנות פיזית ברחובות.` },
+  { name:"רוזמרין", domain:"rozmarin-design.co.il", url:"https://www.rozmarin-design.co.il/product-category/shopping-il/", cat:"accessories", intl:false, deal:"sale", about:`רוזמרין הוא מותג אונליין ובוטיק בקיבוץ מירב לעיצוב והום סטיילינג, שמציע פריטים יפים ונעימים לבית שנבחרים בקפידה בארץ ובעולם, עם חוויית קנייה נגישה ומשלוחים לכל הארץ` },
+  { name:"לד תאורה", domain:"led4light.co.il", url:"https://www.led4light.co.il/category/%D7%97%D7%99%D7%A1%D7%95%D7%9C", cat:"lighting", intl:false, deal:"sale", about:`לד תאורה הוא מותג ישראלי לתאורת LED חכמה ומעוצבת, המתמחה בייצור, יבוא ושיווק פתרונות תאורה מקצה לקצה ללקוחות פרטיים, עסקיים ומוסדיים, עם חוויית אונליין מתקדמת ותמיכה מקצועית` },
+  { name:"Bella Luce גופי תאורה", domain:"gufeteura.co.il", url:"https://gufeteura.co.il/collections/best-sellers", cat:"lighting", intl:false, deal:"visit", about:`מותג אונליין ישראלי לחנות תאורה ועיצוב לבית, המתמחה בגופי תאורה מעוצבים הנמכרים ישירות מהיבואן לצרכן עם שירות אישי, אחריות מלאה והחזרות/החלפות ללא עלות` },
+  { name:"LEDMARKET", domain:"ledmarket.co.il", url:"https://ledmarket.co.il/collections/%D7%A2%D7%95%D7%93%D7%A4%D7%99%D7%9D", cat:"lighting", intl:false, deal:"sale", about:`לדמרקט הוא מותג ורשת חנויות תאורה המתמחה בפתרונות תאורת LED מעוצבים לבית, גינה וחללים מסחריים, עם מגוון רחב של גופי תאורה ייחודיים, דגש על איכות אור, טרנדים עדכניים וחוויית קנייה אונליין ופרונטלית עם ליווי מקצועי` },
+  { name:"מחסני תאורה", domain:"lighting.co.il", url:"https://www.lighting.co.il/75372016", cat:"lighting", intl:false, deal:"sale", about:`מחסני תאורה היא רשת גופי התאורה המובילה בישראל, המציעה מגוון רחב של פתרונות תאורה ומאווררי תקרה לבית ולחוץ, עם חנויות פיזיות ואתר אונליין, מבצעים שוטפים ושירות מקצועי ללקוחות פרטיים ועסקיים` },
+  { name:"ORGANIC BED", domain:"organicbed.co.il", url:"https://organicbed.co.il/", cat:"furniture", intl:false, deal:"visit", about:`מותג ישראלי בוטיקי שמייצר מיטות ובסיסי מיטה מעץ מלא וחומרים טבעיים, בעבודת יד וייצור מקומי, עם דגש על חוויית שינה טבעית, איכות גבוהה ושירות אישי מקיף` },
+  { name:"Trausi + Tosh", domain:"trausiandtosh.com", url:"https://trausiandtosh.com/collections", cat:"walls", intl:false, deal:"visit", about:`מותג וגלריית אמנות אונליין ועם שואורום פיזי, המתמחה ביצירת והדפסת תמונות קנבס ואמנות ממוסגרת לעיצוב קירות הבית והמשרד, עם מגוון קולקציות, התאמה אישית ומשלוחים עד הבית` },
+  { name:"בסיסי עץ-האורן", domain:"basisoren.co.il", url:"https://basisoren.co.il/", cat:"furniture", intl:false, deal:"visit", about:`בסיסי עץ האורן הוא מותג ישראלי שמתמחה בייצור בסיסי מיטה ומיטות מעץ אורן פיני טבעי ישירות מהמפעל לצרכן, עם דגש על מחיר הוגן, שירות אישי, התאמה אישית וחוויית שינה נוחה ואיכותית` },
+  { name:"סוהו", domain:"sohocenter.co.il", url:"https://www.sohocenter.co.il/pages/sale", cat:"decor", intl:false, deal:"sale", about:`מותג ורשת חנויות למוצרים ברמה עיצובית גבוהה המציעה מגוון רחב של פריטים לבית, למטבח, למשרד, לאמבטיה, לילדים ולאופנה, עם כ-70 מותגים מובילים, 12 סניפים ואתר אונליין המתחדשים כל הזמן.` },
+  { name:"פנדה", domain:"pandazzz.co.il", url:"https://pandazzz.co.il/collections/", cat:"textiles", intl:false, deal:"visit", about:`פנדה הוא מותג אונליין ישראלי למוצרי שינה ורכות לבית (מזרנים, מיטות, מצעים, כריות ועוד), שמציע חוויית קנייה דיגיטלית נוחה עם 100 לילות ניסיון, חיתוך פערי תיווך, שירות אישי וסטנדרטים בינלאומיים של איכות` },
+  { name:"HOME21", domain:"home21.co.il", url:"https://home21.co.il/", cat:"furniture", intl:false, deal:"visit", about:`חברת ריהוט ישראלית ותיקה (מעל 25 שנה) המתמחה ברהיטי יוקרה ובעיקר בכיסאות לפינת אוכל וכיסאות בר בעיצוב וייצור בהתאמה אישית ללקוחות פרטיים ועסקיים` },
+  { name:"מעצבים חיבורים", domain:"hiburim-be.co.il", url:"https://hiburim-be.co.il/", cat:"furniture", intl:false, deal:"visit", about:`מעצבים חיבורים הוא מותג ישראלי לפינות ישיבה מודולריות בהתאמה אישית, המשלב נוחות מירבית, ורסטיליות ועיצוב אלגנטי בסלון, בחוץ ולעסקים, עם ייצור מקומי מחומרי גלם ובריפוד איכותיים` },
+  { name:"bukchair", domain:"bukchair.co.il", url:"https://bukchair.co.il/%d7%97%d7%a0%d7%95%d7%aa/", cat:"furniture", intl:false, deal:"visit", about:`חברה ישראלית לריהוט משרדי המתמחה בפתרונות ישיבה ארגונומיים ומותאמים אישית לסביבות עבודה, עם דגש על נוחות, בריאות, יעילות וליווי מקצועי לאורך כל תהליך הרכישה` },
+  { name:"MAGIC MOMENTS", domain:"magic-moments.co.il", url:"https://www.magic-moments.co.il/product-category/%D7%A9%D7%9C%D7%9D-%D7%95%D7%A7%D7%97-outlet/", cat:"decor", intl:false, deal:"outlet", about:`מותג בוטיק ישראלי לריהוט ואקססוריז לבית, שמתמחה ביצירת תחושת בית חמה ושלווה באמצעות פריטי עיצוב נבחרים, עם דגש על טאצ׳ אישי, איכות וחוויית קנייה נעימה.` },
+  { name:"NALLA", domain:"nalla.co.il", url:"https://www.nalla.co.il/product-category/nalla-sale", cat:"furniture", intl:false, deal:"sale", about:`חברה ישראלית לריהוט בהתאמה אישית לבית, כחלק מקבוצת עיצוב רחבה, שמלווה את הלקוח בייעוץ, תכנון וייצור מקומי מוקפד כדי ליצור ריהוט מדויק לצרכים ולחלל` },
+]
+/* ════════════════════════════════════════════════════════
+   RENDER ENGINE
+════════════════════════════════════════════════════════ */
+const FAVICON = d => `https://www.google.com/s2/favicons?domain=${d}&sz=64`;
+const CAT_HE = { all:'כל האתרים', general:'כללי', furniture:'ריהוט', rugs:'שטיחים', textiles:'טקסטיל', decor:'עיצוב הבית', accessories:'אקססוריז', walls:'קירות', kitchen:'מטבח', bathroom:'אמבטיה', allhome:'הכל לבית', lighting:'תאורה' };
+
+let activeCat = 'all';
+let searchQ = '';
+let showIntl = true;
+let activeDeal = 'all';
+
+function buildCard(s) {
+  const letter = s.name.replace(/[^a-zA-Z\u05D0-\u05EA]/g, '')[0] || s.name[0] || '?';
+  const intlMark = s.intl ? '<span class="intl-badge" title="אתר בינלאומי">🌍</span>' : '';
+  const aboutHtml = s.about ? `<div class="info-btn">מידע נוסף ▲<div class="info-tooltip">${s.about}</div></div>` : '';
+  return `
+  <a class="card" href="${s.url}" target="_blank" rel="noopener noreferrer"
+     data-cat="${s.cat}" data-intl="${s.intl}" data-name="${s.name.toLowerCase()} ${s.domain}">
+    ${intlMark}
+    <div class="favicon-wrap">
+      <img
+        src="${FAVICON(s.domain)}"
+        alt="${s.name}"
+        loading="lazy"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+      >
+      <span class="favicon-letter" style="display:none">${letter}</span>
+    </div>
+    <div class="site-name">${s.name}</div>
+    <div class="site-domain">${s.domain}</div>
+    <div class="sale-badge badge-${s.deal}">${{outlet:'Outlet',sale:'Sale',special:'Special Offer',visit:'Check for Discounts'}[s.deal]||'Sale'}</div>
+    ${aboutHtml}
+    <span class="card-btn">
+      לאתר המבצע
+      <span class="arrow">←</span>
+    </span>
+  </a>`;
+}
+
+function countByCat(cat) {
+  return SITES.filter(s =>
+    (cat === 'all' || s.cat === cat) &&
+    (activeDeal === 'all' || s.deal === activeDeal) &&
+    (showIntl || !s.intl)
+  ).length;
+}
+
+function render() {
+  const grid = document.getElementById('grid');
+  const q = searchQ.trim().toLowerCase();
+  let count = 0;
+
+  grid.innerHTML = SITES.map(s => {
+    const catOk  = activeCat === 'all' || s.cat === activeCat;
+    const dealOk = activeDeal === 'all' || s.deal === activeDeal;
+    const intlOk = showIntl || !s.intl;
+    const srchOk = !q || s.name.toLowerCase().includes(q) || s.domain.toLowerCase().includes(q);
+    const show   = catOk && dealOk && intlOk && srchOk;
+    if (show) count++;
+    return buildCard(s).replace('<a class="card"', `<a class="card${show ? '' : ' hidden'}"`);;
+  }).join('');
+
+  document.getElementById('visible-count').textContent = count;
+  if (count === 0) {
+    grid.innerHTML += `<div class="empty-state"><span class="emoji">🔍</span><p>לא נמצאו אתרים. נסה מילת חיפוש אחרת.</p></div>`;
+  }
+  // Update filter button counts
+  ['all','outlet','sale','special','visit'].forEach(d => {
+    const nd = SITES.filter(s => (d === 'all' || s.deal === d) && (activeCat === 'all' || s.cat === activeCat) && (showIntl || !s.intl)).length;
+    const fd = document.getElementById(`dcnt-${d}`);
+    if (fd) fd.textContent = nd;
+  });
+  ['all','general','furniture','rugs','textiles','decor','accessories','walls','kitchen','bathroom','allhome','lighting'].forEach(c => {
+    const n = countByCat(c);
+    const fc = document.getElementById(`fcnt-${c}`);
+    if (fc) fc.textContent = n;
+    const btn = fc ? fc.closest('button') : null;
+    if (btn && c !== 'all') btn.style.display = (n === 0) ? 'none' : '';
+  });
+  const stTotal = document.getElementById('stat-total');
+  const stSale  = document.getElementById('stat-sale');
+  if (stTotal) stTotal.textContent = SITES.length;
+  if (stSale)  stSale.textContent  = SITES.length;
+}
+
+/* ════════ FILTER ════════ */
+function resetAll() {
+  activeCat  = 'all';
+  activeDeal = 'all';
+  document.getElementById('search').value = '';
+  document.querySelectorAll('[data-cat]').forEach(b => b.classList.toggle('active', b.dataset.cat === 'all'));
+  document.querySelectorAll('[data-deal]').forEach(b => b.classList.toggle('active-deal', b.dataset.deal === 'all'));
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function selectCat(cat, btn) {
+  activeCat = cat;
+  document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  render();
+}
+
+function selectDeal(deal, btn) {
+  activeDeal = deal;
+  document.querySelectorAll('[data-deal]').forEach(b => b.classList.remove('active-deal'));
+  if (btn) btn.classList.add('active-deal');
+  render();
+}
+
+/* ════════ EVENT LISTENERS ════════ */
+
+document.getElementById('search').addEventListener('input', e => {
+  searchQ = e.target.value;
+  // Auto-switch to "all" when searching
+  if (searchQ && activeCat !== 'all') {
+    activeCat = 'all';
+    document.querySelectorAll('.filter-link').forEach(b => b.classList.toggle('active', b.dataset.cat === 'all'));
+  }
+  render();
+});
+
+document.getElementById('intl-toggle').addEventListener('change', e => {
+  showIntl = e.target.checked;
+  render();
+});
+
+// Set today's date
+const today = new Date();
+document.getElementById('stat-date').textContent =
+  today.toLocaleDateString('he-IL', { day:'2-digit', month:'2-digit' });
+
+// Initial render
+render();
+</script>
+</body>
+</html>
