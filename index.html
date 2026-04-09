@@ -38,7 +38,7 @@
       position: fixed;
       inset: 0;
       background: url('HomeDrop New Theme.png') center top / cover no-repeat;
-      opacity: 0.13;
+      opacity: 0.4;
       z-index: 0;
       pointer-events: none;
     }
@@ -126,10 +126,9 @@
       gap: 4px;
     }
     .sidebar-label {
-      font-size: 10px;
+      font-size: 13px;
       font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
+      letter-spacing: 0.5px;
       color: var(--text-light);
       padding: 4px 10px 8px;
     }
@@ -278,26 +277,23 @@
     .empty-state {
       grid-column: 1/-1;
       text-align: center;
-      padding: 60px 20px;
+      padding: 12px 20px 20px;
       color: var(--text-light);
     }
+    .empty-state img { width: 80px; opacity: 0.6; display: block; margin: 0 auto 16px; }
     .empty-state .emoji { font-size: 40px; display: block; margin-bottom: 12px; }
 
     /* ── Footer ── */
     footer {
       text-align: center;
-      padding: 24px;
-      font-size: 12px;
+      padding: 8px 16px;
+      font-size: 11px;
       color: var(--text-light);
       border-top: 1px solid var(--border);
       position: relative;
       z-index: 1;
     }
-    footer .brand {
-      font-family: 'Playfair Display', serif;
-      font-size: 16px; font-weight: 600;
-      color: var(--navy); margin-bottom: 4px;
-    }
+    footer .brand { display: none; }
     footer .il { color: var(--gold); }
 
     /* ── Info tooltip ── */
@@ -350,7 +346,7 @@
 <!-- ═══ SLIM HEADER ═══ -->
 <header class="page-header">
   <div class="brand-name" onclick="resetAll()">HomeDrop <span class="il">.IL</span></div>
-  <div class="brand-tagline">מקסימום מבצעים, מעל 150 אתרים בארץ ובעולם</div>
+  <div class="brand-tagline">מקסימום מבצעים, מעל 170 אתרים בארץ ובעולם</div>
   <div class="header-search">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
       <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -400,10 +396,6 @@
 </div>
 
 <!-- ═══ FOOTER ═══ -->
-<footer>
-  <div class="brand">HomeDrop <span class="il">.IL</span></div>
-  <div>כל האתרים מקושרים ישירות לאזורי המבצע שלהם · עדכון יומי</div>
-</footer>
 
 <script>
 /* ═══════════════════════════════════════════════
@@ -414,7 +406,7 @@
 const SITES = [
   { name:"Inky", domain:"inky.co.il", url:"https://inky.co.il/product-category/outlet/", cat:"walls", intl:false, deal:"outlet", about:`הגלריה שלנו היא מגרש משחקים של עיצוב. אנחנו מציעים קולקציה רחבה ומתעדכנת, שנעה בין מינימליזם נקי לאקלקטיות צבעונית ופרועה. כל יצירה ב-Inky היא שילוב ייחודי של דמיון, צבע וחדשנות` },
   { name:"שטיחי כרמל", domain:"carmelfloor.co.il", url:"https://carmelfloor.co.il/", cat:"rugs", intl:false, deal:"visit", about:`עוד משנת 1960 'שטיחי כרמל' נחשבת לחברת חיפויי הרצפה שטיחים ופרקטים הגדולה בישראל, המייצרת ומשווקת מוצרים בסטנדרטים טכנולוגיים מפותחים, בשימוש חומרים בעלי עמידות גבוהה במיוחד.` },
-  { name:"Bunny Bee", domain:"bunnybee.co.il", url:"https://www.bunnybee.co.il/product-category/sale/", cat:"furniture", intl:false, deal:"sale", about:`לבאני בי נגריה צמודה עם צוות באני בי תוכלו להגשים את כל הפנטזיות שלכם בהכנת ריהוט איכותי לפי מידה צבע וסגנון והכל תוצרת ישראל!` },
+  { name:"Bunny Bee", domain:"bunnybee.co.il", url:"https://www.bunnybee.co.il/product-category/sale/", cat:"furniture", intl:false, deal:"sale", about:`לבאני בי נגריה צמודה. עם צוות באני בי תוכלו להגשים את כל הפנטזיות שלכם בהכנת ריהוט איכותי לפי מידה צבע וסגנון והכל תוצרת ישראל!` },
   { name:"רהיטי הסיטי", domain:"rcity.co.il", url:"https://www.rcity.co.il/%d7%a2%d7%95%d7%93%d7%a4%d7%99%d7%9d/", cat:"furniture", intl:false, deal:"special", about:`חברתינו קיימת משנת 2004 ומתמחה בייבוא ושיווק של מיטות מעוצבות, חדרי שינה , מזרנים , ארונות וכו'.` },
   { name:"חותם", domain:"hootam.co.il", url:"https://www.hootam.co.il/collections/%D7%A4%D7%A8%D7%99%D7%98%D7%99%D7%9D-%D7%91%D7%9E%D7%97%D7%99%D7%A8-%D7%9E%D7%99%D7%95%D7%97%D7%93", cat:"furniture", intl:false, deal:"special", about:`הרהיטים של חותם עשויים מעץ מלא ומטופלים בתהליך ייחודי ומוקפד ובגימור המותאם לתנאי מזג האוויר של ישראל. מיותר לציין כי רהיט מעץ מלא הוא פריט לכל החיים, כזה שתוכלו להוריש לנכדים, ושהזמן, כמו יין, עושה לו רק טוב` },
   { name:"בית השטיחים", domain:"shtihim-online.co.il", url:"https://shtihim-online.co.il/product-category/%D7%A2%D7%95%D7%93%D7%A4%D7%99%D7%9D-%D7%9E%D7%A6%D7%99%D7%90%D7%95%D7%9F/", cat:"rugs", intl:false, deal:"special", about:`הקולקציה שלנו כוללת מאות שטיחים מודרניים או קלאסיים, שטיחים המיוצרים בעבודת יד או באמצעות מכונה, שטיחים מחומרים טבעיים או סינטטיים, שטיחים לכל חללי הבית או המשרד וכל זה במחירים הכי זולים שתמצאו.` },
@@ -652,7 +644,7 @@ function render() {
 
   document.getElementById('visible-count').textContent = count;
   if (count === 0) {
-    grid.innerHTML += `<div class="empty-state"><span class="emoji">🔍</span><p>לא נמצאו אתרים. נסה מילת חיפוש אחרת.</p></div>`;
+    grid.innerHTML += `<div class="empty-state"><span class="emoji">💡</span><p>לא נמצאו אתרים</p></div>`;
   }
   // Update filter button counts
   ['all','outlet','sale','special','visit'].forEach(d => {
